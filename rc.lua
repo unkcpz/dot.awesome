@@ -258,7 +258,6 @@ awful.screen.connect_for_each_screen(function(s)
 				polkit_agent_path = "/usr/bin/lxpolkit",
 			}),
 			logout_menu_widget({
-				font = "Play 14",
 				onlock = function()
 					awful.spawn.with_shell(apps.lock)
 				end,
