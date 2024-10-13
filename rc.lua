@@ -1,3 +1,5 @@
+-- luacheck: globals awesome root
+
 -- If LuaRocks is installed, make sure that packages installed through it are
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
@@ -11,45 +13,14 @@ local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
-local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
 
-local has_fdo, freedesktop = pcall(require, "freedesktop")
-
--- {{{ Error handling
--- Check if awesome encountered an error during startup and fell back to
--- another config (This code will only ever execute for the fallback config)
-if awesome.startup_errors then
-	naughty.notify({
-		preset = naughty.config.presets.critical,
-		title = "Oops, there were errors during startup!",
-		text = awesome.startup_errors,
-	})
-end
-
--- Handle runtime errors after startup
-do
-	local in_error = false
-	awesome.connect_signal("debug::error", function(err)
-		-- Make sure we don't go into an endless error loop
-		if in_error then
-			return
-		end
-		in_error = true
-
-		naughty.notify({
-			preset = naughty.config.presets.critical,
-			title = "Oops, an error happened!",
-			text = tostring(err),
-		})
-		in_error = false
-	end)
-end
--- }}}
+require("error-handling")
+require("binding")
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
@@ -64,7 +35,7 @@ local theme_config_dir = gears.filesystem.get_configuration_dir() .. "/themes/" 
 beautiful.init(theme_config_dir .. "/theme.lua")
 
 -- define default apps (global variable so other components can access it)
-apps = {
+local apps = {
 	network_manager = "nm-connection-editor",
 	power_manager = "xfce4-power-manager",
 	terminal = "alacritty",
@@ -75,16 +46,12 @@ apps = {
 	editor = "nvim-qt",
 }
 
--- This is used later as the default terminal and editor to run.
-editor = os.getenv("EDITOR") or apps.editor
-editor_cmd = apps.terminal .. " -e " .. "nvim"
-
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
-modkey = "Mod4"
+_G.modkey = "Mod4"
 
 -- Run all the apps listed in run_on_start_up
 -- List of apps to run on start-up
@@ -120,36 +87,21 @@ awful.layout.layouts = {
 	awful.layout.suit.floating,
 }
 -- }}}
+--
+local function set_wallpaper(s)
+	-- Wallpaper
+	if beautiful.wallpaper then
+		local wallpaper = beautiful.wallpaper
+		-- If wallpaper is a function, call it with the screen
+		if type(wallpaper) == "function" then
+			wallpaper = wallpaper(s)
+		end
+		gears.wallpaper.maximized(wallpaper, s, true)
+	end
+end
 
--- {{{ Menu
--- Create a launcher widget and a main menu
-myawesomemenu = {
-	{
-		"hotkeys",
-		function()
-			hotkeys_popup.show_help(nil, awful.screen.focused())
-		end,
-	},
-	{ "manual", apps.terminal .. " -e man awesome" },
-	{ "edit config", editor_cmd .. " " .. awesome.conffile },
-	{ "restart", awesome.restart },
-	{
-		"quit",
-		function()
-			awesome.quit()
-		end,
-	},
-}
-
-local menu_awesome = { "awesome", myawesomemenu, beautiful.awesome_icon }
-
-local mymainmenu = awful.menu({
-	items = {
-		menu_awesome,
-	},
-})
-
-local mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon, menu = mymainmenu })
+-- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
+screen.connect_signal("property::geometry", set_wallpaper)
 
 -- Menubar configuration
 menubar.utils.terminal = apps.terminal -- Set the terminal for applications that require it
@@ -204,21 +156,6 @@ local tasklist_buttons = gears.table.join(
 		awful.client.focus.byidx(-1)
 	end)
 )
-
-local function set_wallpaper(s)
-	-- Wallpaper
-	if beautiful.wallpaper then
-		local wallpaper = beautiful.wallpaper
-		-- If wallpaper is a function, call it with the screen
-		if type(wallpaper) == "function" then
-			wallpaper = wallpaper(s)
-		end
-		gears.wallpaper.maximized(wallpaper, s, true)
-	end
-end
-
--- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
-screen.connect_signal("property::geometry", set_wallpaper)
 
 -- awesome-wm-widgets
 local pacman_widget = require("widgets.pacman-widget.pacman")
@@ -295,11 +232,13 @@ awful.screen.connect_for_each_screen(function(s)
 				type = "arc",
 				program = "xbacklight",
 				step = 2,
+				timeout = 1,
 				tooltip = true,
 			}),
 			volume_widget({
 				widget_type = "arc",
 				tooltip = true,
+				refresh_rate = 1,
 			}),
 			mykeyboardlayout,
 			wibox.widget.systray(),
@@ -329,16 +268,6 @@ awful.screen.connect_for_each_screen(function(s)
 		s.mytasklist, -- Middle widget
 	})
 end)
--- }}}
-
--- {{{ Mouse bindings
-root.buttons(gears.table.join(
-	awful.button({}, 3, function()
-		mymainmenu:toggle()
-	end),
-	awful.button({}, 4, awful.tag.viewnext),
-	awful.button({}, 5, awful.tag.viewprev)
-))
 -- }}}
 
 -- {{{ Key bindings
@@ -418,11 +347,11 @@ globalkeys = gears.table.join(
 	-- Quit
 	awful.key({ modkey, "Shift" }, "Delete", awesome.quit, { description = "quite awesome", group = "awesome" }),
 
-	-- -- Quit Awesome
-	-- awful.key({ modkey }, "Escape", function()
-	-- 	-- emit signal to show the exit screen
-	-- 	awesome.emit_signal("show_exit_screen")
-	-- end, { description = "toggle exit screen", group = "hotkeys" }),
+	-- Quit Awesome
+	awful.key({ modkey}, "Escape", function()
+		-- emit signal to show the exit screen
+		awesome.quit()
+	end, { description = "toggle exit screen", group = "hotkeys" }),
 	--
 	-- awful.key({}, "XF86PowerOff", function()
 	-- 	-- emit signal to show the exit screen
@@ -589,6 +518,10 @@ for i = 1, 9 do
 	)
 end
 
+-- Set keys
+root.keys(globalkeys)
+-- }}}
+
 clientbuttons = gears.table.join(
 	awful.button({}, 1, function(c)
 		c:emit_signal("request::activate", "mouse_click", { raise = true })
@@ -603,164 +536,5 @@ clientbuttons = gears.table.join(
 	end)
 )
 
--- Set keys
-root.keys(globalkeys)
--- }}}
-
--- define screen height and width
-local screen_height = awful.screen.focused().geometry.height
-local screen_width = awful.screen.focused().geometry.width
-
--- {{{ Rules
--- Rules to apply to new clients (through the "manage" signal).
-awful.rules.rules = {
-	-- All clients will match this rule.
-	{
-		rule = {},
-		properties = {
-			border_width = beautiful.border_width,
-			border_color = beautiful.border_focus,
-			focus = awful.client.focus.filter,
-			raise = true,
-			keys = clientkeys,
-			buttons = clientbuttons,
-			screen = awful.screen.preferred,
-			placement = awful.placement.no_overlap + awful.placement.no_offscreen,
-		},
-	},
-
-	-- Floating clients.
-	{
-		rule_any = {
-			instance = {
-				"DTA", -- Firefox addon DownThemAll.
-				"copyq", -- Includes session name in class.
-				"pinentry",
-			},
-			class = {
-				"Arandr",
-				"Blueman-manager",
-				"Gpick",
-				"Kruler",
-				"MessageWin", -- kalarm.
-				"Sxiv",
-				"Tor Browser", -- Needs a fixed window size to avoid fingerprinting by screen size.
-				"Wpa_gui",
-				"veromix",
-				"xtightvncviewer",
-				"pavucontrol",
-			},
-
-			-- Note that the name property shown in xprop might be set slightly after creation of the client
-			-- and the name shown there might not match defined rules here.
-			name = {
-				"Event Tester", -- xev.
-			},
-			role = {
-				"AlarmWindow", -- Thunderbird's calendar.
-				"ConfigManager", -- Thunderbird's about:config.
-				"pop-up", -- e.g. Google Chrome's (detached) Developer Tools.
-			},
-		},
-		properties = { floating = true },
-	},
-
-	-- Add titlebars to normal clients and dialogs
-	{ rule_any = { type = { "normal", "dialog" } }, properties = { titlebars_enabled = true } },
-
-	-- "Switch to tag"
-	-- These clients make you switch to their tag when they appear
-	{
-		rule_any = {
-			class = {
-				"firefox",
-			},
-		},
-		properties = { tag = awful.screen.focused().selected_tag, switchtotag = true },
-	},
-
-	-- rofi rule
-	{
-		rule_any = { name = { "rofi" } },
-		properties = { maximized = true, floating = true, titlebars_enabled = false },
-	},
-
-	-- File chooser dialog
-	{
-		rule_any = { role = { "GtkFileChooserDialog" } },
-		properties = { floating = true, width = screen_width * 0.55, height = screen_height * 0.65 },
-	},
-
-	-- Pavucontrol & Bluetooth Devices
-	{
-		rule_any = { class = { "Pavucontrol" }, name = { "Bluetooth Devices" } },
-		properties = { floating = true, width = screen_width * 0.55, height = screen_height * 0.45 },
-	},
-}
--- }}}
-
--- {{{ Signals
--- Signal function to execute when a new client appears.
-client.connect_signal("manage", function(c)
-	-- Set the windows at the slave,
-	-- i.e. put it at the end of others instead of setting it master.
-	-- if not awesome.startup then awful.client.setslave(c) end
-
-	if awesome.startup and not c.size_hints.user_position and not c.size_hints.program_position then
-		-- Prevent clients from being unreachable after screen count changes.
-		awful.placement.no_offscreen(c)
-	end
-end)
-
--- Add a titlebar if titlebars_enabled is set to true in the rules.
-client.connect_signal("request::titlebars", function(c)
-	-- buttons for the titlebar
-	local buttons = gears.table.join(
-		awful.button({}, 1, function()
-			c:emit_signal("request::activate", "titlebar", { raise = true })
-			awful.mouse.client.move(c)
-		end),
-		awful.button({}, 3, function()
-			c:emit_signal("request::activate", "titlebar", { raise = true })
-			awful.mouse.client.resize(c)
-		end)
-	)
-
-	awful.titlebar(c):setup({
-		{ -- Left
-			awful.titlebar.widget.iconwidget(c),
-			buttons = buttons,
-			layout = wibox.layout.fixed.horizontal,
-		},
-		{ -- Middle
-			{ -- Title
-				align = "center",
-				widget = awful.titlebar.widget.titlewidget(c),
-			},
-			buttons = buttons,
-			layout = wibox.layout.flex.horizontal,
-		},
-		{ -- Right
-			awful.titlebar.widget.floatingbutton(c),
-			awful.titlebar.widget.maximizedbutton(c),
-			awful.titlebar.widget.stickybutton(c),
-			awful.titlebar.widget.ontopbutton(c),
-			awful.titlebar.widget.closebutton(c),
-			layout = wibox.layout.fixed.horizontal(),
-		},
-		layout = wibox.layout.align.horizontal,
-	})
-end)
-
--- Enable sloppy focus, so that focus follows mouse.
-client.connect_signal("mouse::enter", function(c)
-	c:emit_signal("request::activate", "mouse_enter", { raise = false })
-end)
-
-client.connect_signal("focus", function(c)
-	c.border_color = beautiful.border_focus
-end)
-client.connect_signal("unfocus", function(c)
-	c.border_color = beautiful.border_normal
-end)
--- }}}
+require("rules")
+require("signals")
