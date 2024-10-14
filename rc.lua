@@ -443,7 +443,7 @@ clientkeys = gears.table.join(
 	awful.key({ modkey, "Shift" }, "Return", function(c)
 		c:swap(awful.client.getmaster())
 	end, { description = "move to master", group = "client" }),
-	awful.key({ modkey }, "o", function(c)
+	awful.key({ modkey}, "period", function(c)
 		c:move_to_screen()
 	end, { description = "move to screen", group = "client" }),
 	awful.key({ modkey }, "t", function(c)
@@ -507,13 +507,7 @@ for i = 1, 9 do
 					client.focus:toggle_tag(tag)
 				end
 			end
-		end, { description = "toggle focused client on tag #" .. i, group = "tag" }),
-		-- send to another screen
-		awful.key({ modkey, "Shift" }, ">", function()
-			if client.focus then
-				client.focus:move_to_screen()
-			end
-		end, { description = "move client to next screen", group = "client" })
+		end, { description = "toggle focused client on tag #" .. i, group = "tag" })
 	)
 end
 
