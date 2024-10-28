@@ -62,6 +62,7 @@ local run_on_start_up = {
 	"udiskie",
 	"xss-lock -- " .. apps.lock,
 	"nm-applet",
+    "blueman-applet",
 }
 
 for _, app in ipairs(run_on_start_up) do
