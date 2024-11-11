@@ -59,7 +59,7 @@ awful.rules.rules = {
 				"pop-up", -- e.g. Google Chrome's (detached) Developer Tools.
 			},
 		},
-		properties = { floating = true },
+		properties = { floating = true, width = screen_width * 0.55, height = screen_height * 0.45 },
 	},
 
 	-- Add titlebars to normal clients and dialogs
@@ -79,19 +79,28 @@ awful.rules.rules = {
 	-- rofi rule
 	{
 		rule_any = { name = { "rofi" } },
-		properties = { maximized = true, floating = true, titlebars_enabled = false },
+		properties = {
+			maximized = true,
+			floating = true,
+			titlebars_enabled = false,
+		},
+		callback = function(c)
+			local hpadding = 160
+			local vpadding = 140
+			-- Set geometry with padding (adjust values as needed)
+			c:geometry({
+				x = hpadding, -- Left padding
+				y = vpadding, -- Top padding
+				width = c.screen.workarea.width - 2 * hpadding, -- Screen width minus padding
+				height = c.screen.workarea.height - 2 * vpadding, -- Screen height minus padding
+			})
+		end,
 	},
 
 	-- File chooser dialog
 	{
-		rule_any = { role = { "GtkFileChooserDialog" } },
+		rule_any = { role = { "GtkFileChooserDialog" }, class = { "org.gnome.Nautilus" } },
 		properties = { floating = true, width = screen_width * 0.55, height = screen_height * 0.65 },
-	},
-
-	-- Pavucontrol & Bluetooth Devices
-	{
-		rule_any = { class = { "Pavucontrol" }, name = { "Bluetooth Devices" } },
-		properties = { floating = true, width = screen_width * 0.55, height = screen_height * 0.45 },
 	},
 }
 -- }}}

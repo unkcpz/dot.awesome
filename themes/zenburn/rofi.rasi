@@ -1,7 +1,7 @@
 configuration {
     show-icons: true;
     icon-theme: "Tela-dark";
-    font: "Iosevka Nerd Font 14";
+    font: "MesloLGSDZ Nerd Font 14";
     display-drun: "";
     drun-display-format: "{name}";
 }
@@ -35,7 +35,7 @@ prompt {
 }
 
 entry {
-    font: "SF Pro Display 14";
+    font: "MesloLGSDZ Nerd Font 14";
     placeholder-color: #999999;
     placeholder: "Search Applications";
     blink: true;
@@ -44,14 +44,14 @@ entry {
 
 mainbox {
     children: [ inputbar, listview ];
-    padding: 5%;
+    padding: 0%;
 }
 
 listview {
     columns: 5;
     layout: vertical;
-    spacing: 100;
-    margin: 5% 7%;
+    spacing: 2;
+    margin: 2% 6%;
 }
 
 element {
@@ -84,11 +84,11 @@ element selected.active {
 }
 
 element-icon {
-    size: 6%;
+    size: 2.5%;
 }
 
 element-text {
-    font: "SF Pro Display 14";
+    font: "MesloLGSDZ Nerd Font 14";
     padding: 10 0 0 0;
     text-color: inherit;
     horizontal-align: 0.5;
