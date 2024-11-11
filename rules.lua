@@ -63,7 +63,7 @@ awful.rules.rules = {
 	},
 
 	-- Add titlebars to normal clients and dialogs
-	{ rule_any = { type = { "normal", "dialog" } }, properties = { titlebars_enabled = true } },
+	{ rule_any = { type = { "normal", "dialog" } }, properties = { titlebars_enabled = false } },
 
 	-- "Switch to tag"
 	-- These clients make you switch to their tag when they appear
