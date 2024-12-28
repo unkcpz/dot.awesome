@@ -56,7 +56,6 @@ _G.modkey = "Mod4"
 -- Run all the apps listed in run_on_start_up
 -- List of apps to run on start-up
 local run_on_start_up = {
-	"picom --config " .. theme_config_dir .. "picom.conf",
 	"unclutter",
 	"redshift",
 	"udiskie",
