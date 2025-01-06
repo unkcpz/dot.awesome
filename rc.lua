@@ -471,6 +471,20 @@ globalkeys = gears.table.join(
 	end)
 )
 
+local naughty = require("naughty")
+
+-- Function to notify the current screen
+local function notify_screen_focus()
+	local screen_index = awful.screen.focused().index
+	naughty.notify({
+		title = "Focus here",
+		text = "Screen: " .. screen_index,
+		timeout = 0.8, -- Duration of the notification in seconds
+		bg = "#282c34", -- Background color (e.g., dark gray)
+		fg = "#ffffff", -- Foreground color (e.g., white text)
+	})
+end
+
 clientkeys = gears.table.join(
 	awful.key({ modkey }, "f", function(c)
 		c.fullscreen = not c.fullscreen
@@ -519,6 +533,7 @@ clientkeys = gears.table.join(
 			end
 			screen[next_screen]:emit_signal("request::activate", "keybinding", { raise = true })
 		end
+		notify_screen_focus()
 	end, { description = "focus previous screen", group = "screen" }),
 
 	-- Move focus to the next screen (modkey + .)
@@ -533,6 +548,7 @@ clientkeys = gears.table.join(
 			end
 			screen[next_screen]:emit_signal("request::activate", "keybinding", { raise = true })
 		end
+		notify_screen_focus()
 	end, { description = "focus next screen", group = "screen" }),
 
 	awful.key({ modkey }, "t", function(c)
