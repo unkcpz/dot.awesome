@@ -183,8 +183,14 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Wallpaper
 	set_wallpaper(s)
 
-	-- Each screen has its own tag table.
-	awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+	-- Assign tags based on screen index
+	if s.index == 2 then
+		-- Screen 2 gets aux1, aux2, aux3
+		awful.tag({ ":I", ":II", ":III" }, s, awful.layout.layouts[1])
+	else
+		-- All other screens get the default tags
+		awful.tag({ ":>", ":v", ":w", ":4", ":5", ":6", ":m", ":8", ":9" }, s, awful.layout.layouts[1])
+	end
 
 	-- Create a promptbox for each screen
 	s.mypromptbox = awful.widget.prompt()
@@ -269,21 +275,22 @@ awful.screen.connect_for_each_screen(function(s)
 				end,
 			}),
 			mytextclock,
-			todo_widget(),
-			pacman_widget({
-				interval = 600, -- Refresh every 10 minutes
-				popup_bg_color = "#222222",
-				popup_border_width = 1,
-				popup_border_color = "#7e7e7e",
-				popup_height = 10, -- 10 packages shown in scrollable window
-				popup_width = 300,
-				polkit_agent_path = "/usr/bin/lxpolkit",
+			-- pacman_widget({
+			-- 	interval = 600, -- Refresh every 10 minutes
+			-- 	popup_bg_color = "#222222",
+			-- 	popup_border_width = 1,
+			-- 	popup_border_color = "#7e7e7e",
+			-- 	popup_height = 10, -- 10 packages shown in scrollable window
+			-- 	popup_width = 300,
+			-- 	polkit_agent_path = "/usr/bin/lxpolkit",
+			-- }),
+			logout_menu_widget({
+				onlock = function()
+					awful.spawn.with_shell(apps.lock)
+				end,
 			}),
-		},
-		{
-			layout = wibox.layout.fixed.horizontal,
-			wibox.widget.textbox(" "), -- Spacer (optional)
-			s.mytasklist,
+			todo_widget(),
+			s.mytasklist, -- Middle widget
 		},
 	})
 end)
@@ -494,9 +501,40 @@ clientkeys = gears.table.join(
 	awful.key({ modkey, "Shift" }, "Return", function(c)
 		c:swap(awful.client.getmaster())
 	end, { description = "move to master", group = "client" }),
-	awful.key({ modkey }, "period", function(c)
+
+	-- Move the focused client to the next screen (Shift + modkey + .)
+	awful.key({ modkey, "Shift" }, "period", function(c)
 		c:move_to_screen()
-	end, { description = "move to screen", group = "client" }),
+	end, { description = "move window to next screen", group = "client" }),
+
+	-- Move focus to the previous screen (modkey + ,)
+	awful.key({ modkey }, "comma", function()
+		local s = awful.screen.focus_bydirection("left")
+		if not s then
+			-- Fallback: Manually focus the previous screen
+			local current_screen = awful.screen.focused()
+			local next_screen = current_screen.index - 1
+			if next_screen < 1 then
+				next_screen = screen:count() -- Wrap around to the last screen
+			end
+			screen[next_screen]:emit_signal("request::activate", "keybinding", { raise = true })
+		end
+	end, { description = "focus previous screen", group = "screen" }),
+
+	-- Move focus to the next screen (modkey + .)
+	awful.key({ modkey }, "period", function()
+		local s = awful.screen.focus_bydirection("right")
+		if not s then
+			-- Fallback: Manually focus the next screen
+			local current_screen = awful.screen.focused()
+			local next_screen = current_screen.index + 1
+			if next_screen > screen:count() then
+				next_screen = 1 -- Wrap around to the first screen
+			end
+			screen[next_screen]:emit_signal("request::activate", "keybinding", { raise = true })
+		end
+	end, { description = "focus next screen", group = "screen" }),
+
 	awful.key({ modkey }, "t", function(c)
 		c.ontop = not c.ontop
 	end, { description = "toggle keep on top", group = "client" }),
