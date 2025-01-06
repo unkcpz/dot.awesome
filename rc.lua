@@ -64,7 +64,7 @@ local apps = {
 -- If you do not like this or do not have such a key,
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
-_G.modkey = "Mod4"
+_G.modkey = "Mod1"
 
 -- Run all the apps listed in run_on_start_up
 -- List of apps to run on start-up
