@@ -60,7 +60,7 @@ local run_on_start_up = {
 	"udiskie",
 	"xss-lock -- " .. apps.lock,
 	"nm-applet",
-    "blueman-applet",
+	"blueman-applet",
 }
 
 for _, app in ipairs(run_on_start_up) do
@@ -346,7 +346,7 @@ globalkeys = gears.table.join(
 	awful.key({ modkey, "Shift" }, "Delete", awesome.quit, { description = "quite awesome", group = "awesome" }),
 
 	-- Quit Awesome
-	awful.key({ modkey}, "Escape", function()
+	awful.key({ modkey }, "Escape", function()
 		-- emit signal to show the exit screen
 		awesome.quit()
 	end, { description = "toggle exit screen", group = "hotkeys" }),
@@ -368,11 +368,11 @@ globalkeys = gears.table.join(
 		awful.tag.incmwfact(0.05)
 	end, { description = "increase master width factor", group = "layout" }),
 	awful.key({ modkey, "Shift" }, "j", function()
-		awful.tag.incnmaster(1, nil, true)
-	end, { description = "increase the number of master clients", group = "layout" }),
+		awful.client.incwfact(-0.05)
+	end, { description = "increase master height factor", group = "layout" }),
 	awful.key({ modkey, "Shift" }, "k", function()
-		awful.tag.incnmaster(-1, nil, true)
-	end, { description = "decrease the number of master clients", group = "layout" }),
+		awful.client.incwfact(0.05)
+	end, { description = "decrease master height factor", group = "layout" }),
 	awful.key({ modkey, "Control" }, "j", function()
 		awful.tag.incncol(1, nil, true)
 	end, { description = "increase the number of columns", group = "layout" }),
@@ -442,7 +442,7 @@ clientkeys = gears.table.join(
 	awful.key({ modkey, "Shift" }, "Return", function(c)
 		c:swap(awful.client.getmaster())
 	end, { description = "move to master", group = "client" }),
-	awful.key({ modkey}, "period", function(c)
+	awful.key({ modkey }, "period", function(c)
 		c:move_to_screen()
 	end, { description = "move to screen", group = "client" }),
 	awful.key({ modkey }, "t", function(c)
