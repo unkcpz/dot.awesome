@@ -57,7 +57,6 @@ _G.modkey = "Mod4"
 -- List of apps to run on start-up
 local run_on_start_up = {
 	"unclutter",
-	"redshift",
 	"udiskie",
 	"xss-lock -- " .. apps.lock,
 	"nm-applet",
