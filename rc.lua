@@ -209,7 +209,7 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Create the wibox
 	-- Set wibar height and custom width
 	local bar_height = 24
-	local bar_width = 1600
+	local bar_width = 1800
 	s.mywibox = awful.wibar({ position = "top", screen = s, stretch = false, height = bar_height, width = bar_width })
 
 	-- Add widgets to the wibox
@@ -262,8 +262,8 @@ awful.screen.connect_for_each_screen(function(s)
 				end,
 			}),
 			todo_widget(),
+			s.mytasklist, -- Middle widget
 		},
-		s.mytasklist, -- Middle widget
 	})
 end)
 -- }}}
@@ -414,6 +414,16 @@ globalkeys = gears.table.join(
 	awful.key({ modkey }, "Return", function()
 		awful.spawn(apps.terminal)
 	end, { description = "open a terminal", group = "launcher" }),
+	awful.key({ modkey, "Shift" }, "Return", function()
+		-- Ensure the layout is set to "tabbed"
+		local t = awful.screen.focused().selected_tag
+		if t and t.layout ~= awful.layout.suit.tabbed then
+			awful.layout.set(awful.layout.suit.tabbed)
+		end
+		-- Spawn the terminal
+		awful.spawn(apps.terminal)
+	end, { description = "open a terminal in tabbed mode", group = "launcher" }),
+
 	-- launch rofi
 	awful.key({ modkey }, "d", function()
 		awful.spawn(apps.launcher)
