@@ -212,17 +212,21 @@ awful.screen.connect_for_each_screen(function(s)
 	})
 
 	-- Create a tasklist widget
-	s.mytasklist = awful.widget.tasklist({
-		screen = s,
-		filter = awful.widget.tasklist.filter.currenttags,
-		buttons = tasklist_buttons,
-	})
+	s.mytasklist = wibox.container.constraint(
+		awful.widget.tasklist({
+			screen = s,
+			filter = awful.widget.tasklist.filter.currenttags,
+			buttons = tasklist_buttons,
+		}),
+		"exact",
+		1000 -- Set desired width
+	)
 
 	-- Create the wibox
 	-- Set wibar height and custom width
 	local bar_height = 24
 	local bar_width = 1960
-	s.mywibox = awful.wibar({ position = "bottom", screen = s, stretch = false, height = bar_height, width = bar_width })
+	s.mywibox = awful.wibar({ position = "bottom", screen = s, stretch = true, height = bar_height, width = bar_width })
 
 	-- Add widgets to the wibox
 	s.mywibox:setup({
@@ -233,12 +237,27 @@ awful.screen.connect_for_each_screen(function(s)
 			s.mylayoutbox,
 			s.mytaglist,
 			s.mypromptbox,
-		},
-		{ -- Right widgets
-			layout = wibox.layout.fixed.horizontal,
-			spacing = 8,
 			cpu_widget(),
 			ram_widget(),
+		},
+		{
+			layout = wibox.layout.fixed.horizontal,
+			wibox.widget.textbox(" "), -- Spacer (optional)
+			s.mytasklist,
+		},
+		{
+			layout = wibox.layout.fixed.horizontal,
+			spacing = 8,
+			todo_widget(),
+			pacman_widget({
+				interval = 600, -- Refresh every 10 minutes
+				popup_bg_color = "#222222",
+				popup_border_width = 1,
+				popup_border_color = "#7e7e7e",
+				popup_height = 10, -- 10 packages shown in scrollable window
+				popup_width = 300,
+				polkit_agent_path = "/usr/bin/lxpolkit",
+			}),
 			brightness_widget({
 				type = "arc",
 				program = "xbacklight",
@@ -259,22 +278,11 @@ awful.screen.connect_for_each_screen(function(s)
 				warning_msg_icon = "/home/jyu/.config/awesome/widgets/battery-widget/spaceman.jpg",
 			}),
 			mytextclock,
-			pacman_widget({
-				interval = 600, -- Refresh every 10 minutes
-				popup_bg_color = "#222222",
-				popup_border_width = 1,
-				popup_border_color = "#7e7e7e",
-				popup_height = 10, -- 10 packages shown in scrollable window
-				popup_width = 300,
-				polkit_agent_path = "/usr/bin/lxpolkit",
-			}),
 			logout_menu_widget({
 				onlock = function()
 					awful.spawn.with_shell(apps.lock)
 				end,
 			}),
-			todo_widget(),
-			s.mytasklist, -- Middle widget
 		},
 	})
 end)
