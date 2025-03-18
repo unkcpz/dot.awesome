@@ -221,8 +221,8 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Create the wibox
 	-- Set wibar height and custom width
 	local bar_height = 24
-	local bar_width = 1800
-	s.mywibox = awful.wibar({ position = "top", screen = s, stretch = false, height = bar_height, width = bar_width })
+	local bar_width = 1960
+	s.mywibox = awful.wibar({ position = "bottom", screen = s, stretch = false, height = bar_height, width = bar_width })
 
 	-- Add widgets to the wibox
 	s.mywibox:setup({
