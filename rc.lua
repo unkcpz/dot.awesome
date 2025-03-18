@@ -45,7 +45,7 @@ naughty.config.defaults.width = 280
 naughty.config.defaults.height = 60
 naughty.config.defaults.margin = 2
 naughty.config.defaults.font = "Monospace 8"
-naughty.config.defaults.icon_size = 60
+naughty.config.defaults.icon_size = 48
 
 -- define default apps (global variable so other components can access it)
 local apps = {
