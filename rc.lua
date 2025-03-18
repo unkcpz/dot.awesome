@@ -37,7 +37,7 @@ beautiful.init(theme_config_dir .. "/theme.lua")
 
 -- size of notify
 naughty.config.defaults.shape = function(cr, width, height)
-	gears.shape.rounded_rect(cr, width, height, 4)
+	gears.shape.rounded_rect(cr, width, height, 2)
 end
 
 naughty.config.defaults.position = "top_right"
@@ -45,6 +45,7 @@ naughty.config.defaults.width = 280
 naughty.config.defaults.height = 60
 naughty.config.defaults.margin = 2
 naughty.config.defaults.font = "Monospace 8"
+naughty.config.defaults.icon_size = 60
 
 -- define default apps (global variable so other components can access it)
 local apps = {
@@ -226,7 +227,7 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Set wibar height and custom width
 	local bar_height = 24
 	local bar_width = 1960
-	s.mywibox = awful.wibar({ position = "bottom", screen = s, stretch = true, height = bar_height, width = bar_width })
+	s.mywibox = awful.wibar({ position = "top", screen = s, stretch = false, height = bar_height, width = bar_width })
 
 	-- Add widgets to the wibox
 	s.mywibox:setup({
@@ -242,22 +243,7 @@ awful.screen.connect_for_each_screen(function(s)
 		},
 		{
 			layout = wibox.layout.fixed.horizontal,
-			wibox.widget.textbox(" "), -- Spacer (optional)
-			s.mytasklist,
-		},
-		{
-			layout = wibox.layout.fixed.horizontal,
-			spacing = 8,
-			todo_widget(),
-			pacman_widget({
-				interval = 600, -- Refresh every 10 minutes
-				popup_bg_color = "#222222",
-				popup_border_width = 1,
-				popup_border_color = "#7e7e7e",
-				popup_height = 10, -- 10 packages shown in scrollable window
-				popup_width = 300,
-				polkit_agent_path = "/usr/bin/lxpolkit",
-			}),
+			spacing = 10,
 			brightness_widget({
 				type = "arc",
 				program = "xbacklight",
@@ -277,12 +263,27 @@ awful.screen.connect_for_each_screen(function(s)
 				path_to_icons = "/home/jyu/.config/awesome/icons/Arc/stats/symbolic/",
 				warning_msg_icon = "/home/jyu/.config/awesome/widgets/battery-widget/spaceman.jpg",
 			}),
-			mytextclock,
 			logout_menu_widget({
 				onlock = function()
 					awful.spawn.with_shell(apps.lock)
 				end,
 			}),
+			mytextclock,
+			todo_widget(),
+			pacman_widget({
+				interval = 600, -- Refresh every 10 minutes
+				popup_bg_color = "#222222",
+				popup_border_width = 1,
+				popup_border_color = "#7e7e7e",
+				popup_height = 10, -- 10 packages shown in scrollable window
+				popup_width = 300,
+				polkit_agent_path = "/usr/bin/lxpolkit",
+			}),
+		},
+		{
+			layout = wibox.layout.fixed.horizontal,
+			wibox.widget.textbox(" "), -- Spacer (optional)
+			s.mytasklist,
 		},
 	})
 end)
