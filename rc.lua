@@ -12,6 +12,7 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
+local naughty = require("naughty")
 -- Notification library
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
@@ -33,6 +34,17 @@ local themes = {
 -- change this number to use the corresponding theme
 local theme_config_dir = gears.filesystem.get_configuration_dir() .. "/themes/" .. themes[1] .. "/"
 beautiful.init(theme_config_dir .. "/theme.lua")
+
+-- size of notify
+naughty.config.defaults.shape = function(cr, width, height)
+	gears.shape.rounded_rect(cr, width, height, 4)
+end
+
+naughty.config.defaults.position = "top_right"
+naughty.config.defaults.width = 280
+naughty.config.defaults.height = 60
+naughty.config.defaults.margin = 2
+naughty.config.defaults.font = "Monospace 8"
 
 -- define default apps (global variable so other components can access it)
 local apps = {
@@ -401,6 +413,14 @@ globalkeys = gears.table.join(
 			history_path = awful.util.get_cache_dir() .. "/history_eval",
 		})
 	end, { description = "lua execute prompt", group = "awesome" }),
+
+	awful.key({ modkey }, "'", function()
+		awful.spawn.easy_async_with_shell("xclip -o -selection clipboard", function(stdout)
+			local yy = stdout:gsub("\n", "")
+			naughty.notify({ text = yy, timeout = 2 })
+		end)
+	end, { description = "Inspect xclip", group = "custom" }),
+
 	-- Menubar
 	awful.key({ modkey }, "p", function()
 		menubar.show()
@@ -440,6 +460,19 @@ clientkeys = gears.table.join(
 		c.fullscreen = not c.fullscreen
 		c:raise()
 	end, { description = "toggle fullscreen", group = "client" }),
+
+	awful.key({ modkey, "Shift" }, "y", function()
+		awful.spawn.easy_async_with_shell("xclip -o -selection clipboard", function(stdout)
+			local url = stdout:gsub("\n", "")
+			if url:match("^https?://") then
+				naughty.notify({ text = "rendering " .. url .. "to mpv", timeout = 4 })
+				awful.spawn("mpv --geometry=1280x720 --no-border '" .. url .. "'")
+			else
+				naughty.notify({ text = "No valid URL found!", timeout = 2 })
+			end
+		end)
+	end, { description = "Open clipboard URL in mpv", group = "custom" }),
+
 	awful.key({ modkey, "Shift" }, "c", function(c)
 		c:kill()
 	end, { description = "close", group = "client" }),
