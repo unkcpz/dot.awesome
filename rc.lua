@@ -329,6 +329,11 @@ globalkeys = gears.table.join(
 		awful.util.spawn("amixer -D pulse set Master 1+ toggle", false)
 	end),
 
+	-- toggle touchpad
+	awful.key({ modkey }, "F11", function()
+		awful.util.spawn(os.getenv("HOME") .. "/.config/awesome/scripts/toggle-touchpad.sh", false)
+	end),
+
 	-- Layout manipulation
 	awful.key({ modkey, "Shift" }, "h", function()
 		awful.client.swap.byidx(1)
