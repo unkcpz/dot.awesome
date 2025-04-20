@@ -73,7 +73,7 @@ awful.rules.rules = {
 				"firefox",
 			},
 		},
-		properties = { tag = awful.screen.focused().selected_tag, switchtotag = true },
+		properties = { switchtotag = true, maximized = false },
 	},
 
 	-- rofi rule
